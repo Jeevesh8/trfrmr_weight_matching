@@ -1,3 +1,5 @@
+import logging
+
 import jax.numpy as jnp
 import jax.random as jr
 from scipy.optimize import linear_sum_assignment
@@ -5,12 +7,16 @@ from scipy.optimize import linear_sum_assignment
 from ..perm_spec import PermutationSpec
 from ..utils import tile_windows, nest_shuffles, get_permuted_param, rngmix
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
 def find_nested_perm(assign_mat_kq, assign_mat_v, num_heads, hidden_dim):
     """Finds permutation for keys(will be same for queries) and value weights of
-    a transformer layer, by ensuring that the heads for key-queries and values 
+    a transformer layer, by ensuring that the heads for key-queries and values
     move together.
     Args:
-        assign_mat_kq:  Matrix indicating the weight matching scores(i.e., dot 
+        assign_mat_kq:  Matrix indicating the weight matching scores(i.e., dot
                         products after permutation) for permuting weights from
                         position i to position j, along P_{n}_key axes.
         assign_mat_v:   Same as assign_mat_kq, but for permutations along P_{n}_value
@@ -18,14 +24,14 @@ def find_nested_perm(assign_mat_kq, assign_mat_v, num_heads, hidden_dim):
         num_heads:      number of heads.
         hidden_dim:     hidden_dim of the model.
     Returns:
-        1-D vectors indicating permutation to perform for key and value weights of 
+        1-D vectors indicating permutation to perform for key and value weights of
         transformer.
-    
+
     Procedue:
         The score for permuting head i to head j is set as a sum of two quantites:
-            1. Maximized cost obtained from solving LSAP for assigning weights 
+            1. Maximized cost obtained from solving LSAP for assigning weights
                in head i to head j, along P_key axes.
-            2. Maximized cost obtained from solving LSAP for assigning weights 
+            2. Maximized cost obtained from solving LSAP for assigning weights
                in head i to head j, along P_value axes.
         Then we solve an outer LSAP for deciding which head to assign to which,
         using these scores for permuting between 2 heads.
@@ -127,13 +133,13 @@ def head_perm_weight_matching(
 
             oldL = jnp.vdot(A, jnp.eye(n)[perm[p]])
             newL = jnp.vdot(A, jnp.eye(n)[ci, :])
-            print(f"{iteration}/{p}: {newL - oldL}, {newL}, {oldL}")
+            logger.info(f"{iteration}/{p}: {newL - oldL}, {newL}, {oldL}")
             progress = progress or newL > oldL + 1e-12
 
             if "key" in p:
                 oldL = jnp.vdot(A_v, jnp.eye(n_v)[perm[p_v]])
                 newL = jnp.vdot(A_v, jnp.eye(n_v)[ci_v, :])
-                print(f"{iteration}/{p_v}: {newL - oldL}, {newL}, {oldL}")
+                logger.info(f"{iteration}/{p_v}: {newL - oldL}, {newL}, {oldL}")
                 progress = progress or newL > oldL + 1e-12
 
                 perm[p_v] = jnp.array(ci_v)
