@@ -82,7 +82,8 @@ def head_perm_weight_matching(
     max_iter=100,
     init_perm=None,
 ):
-    """Find a permutation of `params_b` to make them match `params_a`."""
+    """Find a permutation of `params_b` to make them match `params_a`.
+    Same permutation is applied to Q, K, V of any attention head."""
     perm_sizes = {
         p: params_a[axes[0][0]].shape[axes[0][1]] for p, axes in ps.perm_to_axes.items()
     }

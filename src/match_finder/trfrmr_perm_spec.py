@@ -28,6 +28,23 @@ trfrmr_layer = lambda name, layer_num, p_in, key_out, value_out, p_interim: {**a
                                                                              **ffn(f"{name}/layer/{layer_num}", p_in, p_interim)}
 
 def get_trfrmr_permutation_spec(name="bert", num_layers=12):
+
+    if "roberta" in name.lower():
+        return permutation_spec_from_axes_to_perm(
+                    dict(ChainMap(
+                            *([embedding(name+"/embeddings", "P_residual"),]+
+                            [
+                                trfrmr_layer(name+"/encoder", i, "P_residual", f"P_key_{i}", f"P_value_{i}", f"P_interim_{i}")
+                                for i in range(num_layers)
+                            ]+
+                            [
+                                linear_layer("classifier/out_proj", "P_residual", "P_final"),
+                                linear_layer("classifier", "P_final", None),
+                            ])
+                        )
+                    )
+                )
+    
     return permutation_spec_from_axes_to_perm(
                 dict(ChainMap(
                         *([embedding(name+"/embeddings", "P_residual"),]+
