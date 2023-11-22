@@ -38,8 +38,9 @@ def match_params(model1, model2, return_models="pt", head_perm=True, model_type=
       3. followed by, bert/pooler/dense : a linear layer
       4. followed by, classifier/: a linear layer
     
-    In roberta type models the third one is replaced with:
+    In roberta type models the third and fourth one is replaced with:
       3. classifier/out_proj: a linear layer.
+      4. classifier/dense: a linear layer.
     """
     assert model_type in ['bert', 'roberta']
     if type(model1) is str:

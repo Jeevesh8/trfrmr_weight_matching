@@ -39,7 +39,7 @@ def get_trfrmr_permutation_spec(name="bert", num_layers=12):
                             ]+
                             [
                                 linear_layer("classifier/out_proj", "P_residual", "P_final"),
-                                linear_layer("classifier", "P_final", None),
+                                linear_layer("classifier/dense", "P_final", None),
                             ])
                         )
                     )
