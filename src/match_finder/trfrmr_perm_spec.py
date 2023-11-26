@@ -38,8 +38,8 @@ def get_trfrmr_permutation_spec(name="bert", num_layers=12):
                                 for i in range(num_layers)
                             ]+
                             [
-                                linear_layer("classifier/out_proj", "P_residual", "P_final"),
-                                linear_layer("classifier/dense", "P_final", None),
+                                linear_layer("classifier/dense", "P_residual", "P_final"),
+                                linear_layer("classifier/out_proj", "P_final", None),
                             ])
                         )
                     )
